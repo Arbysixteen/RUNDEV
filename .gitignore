@@ -1,5 +1,9 @@
 *.log
 .DS_Store
+.env
+
+# Firebase credentials
+*firebase*.json
 
 .env.backup
 .env.production
