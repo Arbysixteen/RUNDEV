@@ -381,13 +381,33 @@
                     console.log('Registration response:', result);
                     
                     if (result.success) {
-                        showMessage('Pendaftaran berhasil! ID Peserta: ' + result.data.participantId, 'success');
+                        // Sign in with the newly created account to send verification email
+                        try {
+                            const userCredential = await auth.signInWithEmailAndPassword(data.email, data.password);
+                            const user = userCredential.user;
+                            
+                            // Send verification email using Firebase client SDK
+                            await user.sendEmailVerification({
+                                url: window.location.origin + '/peserta/login?verified=true',
+                                handleCodeInApp: false
+                            });
+                            
+                            // Sign out immediately after sending email
+                            await auth.signOut();
+                            
+                            showMessage('Pendaftaran berhasil! Email verifikasi telah dikirim ke ' + data.email + '. Silakan cek inbox email Anda (termasuk folder spam) untuk verifikasi akun.', 'success');
+                            console.log('Verification email sent successfully');
+                        } catch (emailError) {
+                            console.error('Error sending verification email:', emailError);
+                            showMessage('Pendaftaran berhasil, tetapi gagal mengirim email verifikasi. Silakan gunakan fitur "Kirim Ulang Email Verifikasi" di halaman login.', 'success');
+                        }
+                        
                         // Reset form
                         this.reset();
-                        // Redirect to home after 2 seconds
+                        // Redirect to login page after 5 seconds
                         setTimeout(() => {
-                            window.location.href = '/';
-                        }, 2000);
+                            window.location.href = '/peserta/login';
+                        }, 5000);
                     } else {
                         showMessage('Pendaftaran gagal: ' + (result.message || 'Unknown error'), 'error');
                     }

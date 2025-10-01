@@ -1,11 +1,97 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# RUN DEV - Event Lari untuk Developer
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikasi web untuk event lari khusus developer yang dibangun dengan Laravel dan Firebase.
+
+## Deskripsi Aplikasi
+
+RUN DEV adalah platform pendaftaran event lari yang dirancang khusus untuk komunitas developer. Aplikasi ini menyediakan:
+
+- **Pendaftaran Online**: Form pendaftaran dengan berbagai kategori lomba (5K, 10K, Half Marathon)
+- **Dashboard Peserta**: Portal untuk peserta melihat status pendaftaran dan pembayaran
+- **Admin Panel**: Interface untuk mengelola peserta dan event
+- **Firebase Integration**: Autentikasi dan database real-time menggunakan Firebase
+
+## Tech Stack
+
+- **Backend**: Laravel 12 dengan PHP 8.2+
+- **Frontend**: Blade Templates dengan Vite dan Tailwind CSS
+- **Database**: Firebase Realtime Database
+- **Authentication**: Firebase Auth
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS
+
+## Fitur Utama
+
+- ✅ Pendaftaran peserta dengan validasi lengkap
+- ✅ Sistem autentikasi Firebase
+- ✅ Dashboard peserta dan admin
+- ✅ Manajemen pembayaran
+- ✅ Email notifikasi
+- ✅ Responsive design
+- ✅ Firebase real-time database integration
+
+## Installation & Setup
+
+### Prerequisites
+- PHP 8.2+
+- Composer
+- Node.js 18+ dan NPM
+- Firebase Project dengan Realtime Database
+
+### Installation Steps
+
+1. **Clone repository**
+```bash
+git clone <repository-url>
+cd run-dev-event
+```
+
+2. **Install PHP dependencies**
+```bash
+composer install
+```
+
+3. **Install Node.js dependencies**
+```bash
+npm install
+```
+
+4. **Environment setup**
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+5. **Configure Firebase**
+- Update `.env` dengan Firebase credentials:
+```env
+FIREBASE_CREDENTIALS=/path/to/firebase-admin-sdk.json
+FIREBASE_DATABASE_URL=https://your-project-default-rtdb.firebaseio.com
+
+MIX_FIREBASE_API_KEY=your_api_key
+MIX_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+MIX_FIREBASE_DATABASE_URL=https://your-project-default-rtdb.firebaseio.com/
+MIX_FIREBASE_PROJECT_ID=your-project-id
+MIX_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+MIX_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+MIX_FIREBASE_APP_ID=your_app_id
+```
+
+6. **Build assets**
+```bash
+npm run build
+# or for development
+npm run dev
+```
+
+7. **Start development server**
+```bash
+php artisan serve
+```
+
+## Deployment
+
+Lihat file `TUTORIAL_DEPLOY_HOSTINGER.md` untuk panduan lengkap deployment ke Hostinger.
 
 ## About Laravel
 

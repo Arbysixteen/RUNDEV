@@ -13,12 +13,8 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
         
-        <!-- React & React DOM -->
-        <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-        <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-        
-        <!-- Babel untuk JSX -->
-        <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+        <!-- Vite Assets -->
+        @vite(['resources/js/app.js', 'resources/css/app.css'])
         
         <!-- Styles -->
         <style>
@@ -231,87 +227,73 @@
             </a>
         </div>
         
-        <div id="app"></div>
-        
-        <script type="text/babel">
-            @verbatim
-            // React components
-            const App = () => {
-                
-                // No need for form handling in this page anymore
-                
-                return (
-                    <React.Fragment>
-                        {/* Hero Section */}
-                        <section className="hero">
-                            <div className="floating-bg bg1" style={{animation: 'float 6s ease-in-out infinite'}}></div>
-                            <div className="floating-bg bg2" style={{animation: 'float 8s ease-in-out infinite 1s'}}></div>
-                            <div className="floating-bg bg3" style={{animation: 'float 7s ease-in-out infinite 2s'}}></div>
-                            
-                            <div className="hero-content">
-                                <h1>RUN DEV</h1>
-                                <p>Lari untuk Developer, Lari untuk Masa Depan</p>
-                                <div style={{display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap'}}>
-                                    <a href="/pendaftaran" className="cta-button" style={{textDecoration: 'none', display: 'inline-block'}}>Daftar Sekarang</a>
-                                    <a href="/peserta/login" className="cta-button-secondary" style={{textDecoration: 'none', display: 'inline-block'}}>Login Peserta</a>
-                                </div>
-                            </div>
-                        </section>
-                        
-                        {/* About Section */}
-                        <section className="about">
-                            <h2>Tentang RUN DEV</h2>
-                            <div className="categories">
-                                <div className="category">
-                                    <h3>5K</h3>
-                                    <p>Perfect untuk pemula dan developer yang ingin memulai journey lari</p>
-                                    <div className="price">Rp 150.000</div>
-                                    <ul>
-                                        <li>Jersey eksklusif</li>
-                                        <li>Medali finisher</li>
-                                        <li>Sertifikat digital</li>
-                                    </ul>
-                                </div>
-                                
-                                <div className="category">
-                                    <h3>10K</h3>
-                                    <p>Tantangan menengah untuk developer yang sudah terbiasa berlari</p>
-                                    <div className="price">Rp 200.000</div>
-                                    <ul>
-                                        <li>Jersey eksklusif</li>
-                                        <li>Medali finisher</li>
-                                        <li>Sertifikat digital</li>
-                                        <li>Tumbler eksklusif</li>
-                                    </ul>
-                                </div>
-                                
-                                <div className="category">
-                                    <h3>Half Marathon</h3>
-                                    <p>Tantangan ultimate untuk developer dengan stamina tinggi</p>
-                                    <div className="price">Rp 300.000</div>
-                                    <ul>
-                                        <li>Jersey eksklusif</li>
-                                        <li>Medali finisher premium</li>
-                                        <li>Sertifikat digital</li>
-                                        <li>Goodie bag premium</li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div style={{textAlign: 'center', marginTop: '40px'}}>
-                                <a href="/pendaftaran" className="cta-button" style={{textDecoration: 'none', display: 'inline-block'}}>Daftar Sekarang</a>
-                            </div>
-                        </section>
-                        
-                        {/* No registration form here - redirecting to /pendaftaran page */}
-                    </React.Fragment>
-                );
-            };
+        <!-- Firebase Status Indicator
+        <div id="firebase-status" class="fixed top-4 right-4 px-4 py-2 rounded-md shadow-md z-50 bg-gray-100 text-gray-800">
+            <div class="flex items-center">
+                <div class="w-3 h-3 rounded-full mr-2 bg-gray-500"></div>
+                <span class="text-sm font-medium">Firebase: Belum diuji</span>
+            </div>
+        </div> -->
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="floating-bg bg1" style="animation: float 6s ease-in-out infinite"></div>
+            <div class="floating-bg bg2" style="animation: float 8s ease-in-out infinite 1s"></div>
+            <div class="floating-bg bg3" style="animation: float 7s ease-in-out infinite 2s"></div>
             
-            // Render app
-            const root = ReactDOM.createRoot(document.getElementById('app'));
-            root.render(<App />);
-            @endverbatim
-        </script>
+            <div class="hero-content">
+                <h1>RUN DEV</h1>
+                <p>Lari untuk Developer, Lari untuk Masa Depan</p>
+                <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                    <a href="/pendaftaran" class="cta-button" style="text-decoration: none; display: inline-block;">Daftar Sekarang</a>
+                    <a href="/peserta/login" class="cta-button-secondary" style="text-decoration: none; display: inline-block;">Login Peserta</a>
+                </div>
+            </div>
+        </section>
+        
+        <!-- About Section -->
+        <section class="about">
+            <h2>Tentang RUN DEV</h2>
+            <div class="categories">
+                <div class="category">
+                    <h3>5K</h3>
+                    <p>Perfect untuk pemula dan developer yang ingin memulai journey lari</p>
+                    <div class="price">Rp 150.000</div>
+                    <ul>
+                        <li>Jersey eksklusif</li>
+                        <li>Medali finisher</li>
+                        <li>Sertifikat digital</li>
+                    </ul>
+                </div>
+                
+                <div class="category">
+                    <h3>10K</h3>
+                    <p>Tantangan menengah untuk developer yang sudah terbiasa berlari</p>
+                    <div class="price">Rp 200.000</div>
+                    <ul>
+                        <li>Jersey eksklusif</li>
+                        <li>Medali finisher</li>
+                        <li>Sertifikat digital</li>
+                        <li>Tumbler eksklusif</li>
+                    </ul>
+                </div>
+                
+                <div class="category">
+                    <h3>Half Marathon</h3>
+                    <p>Tantangan ultimate untuk developer dengan stamina tinggi</p>
+                    <div class="price">Rp 300.000</div>
+                    <ul>
+                        <li>Jersey eksklusif</li>
+                        <li>Medali finisher premium</li>
+                        <li>Sertifikat digital</li>
+                        <li>Goodie bag premium</li>
+                    </ul>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 40px;">
+                <a href="/pendaftaran" class="cta-button" style="text-decoration: none; display: inline-block;">Daftar Sekarang</a>
+            </div>
+        </section>
         
         <style>
             @keyframes float {

@@ -4,6 +4,9 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+        <meta http-equiv="Pragma" content="no-cache">
+        <meta http-equiv="Expires" content="0">
 
         <title>Login Peserta - RUN DEV</title>
         <meta name="description" content="Login untuk peserta RUN DEV - Event Lari untuk Developer">
@@ -180,6 +183,27 @@
             .tab-content.active {
                 display: block;
             }
+            
+            .resend-link {
+                background: #4f46e5;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 0.9rem;
+                font-weight: 500;
+                transition: background 0.3s;
+            }
+            
+            .resend-link:hover {
+                background: #4338ca;
+            }
+            
+            .resend-link:disabled {
+                background: #9ca3af;
+                cursor: not-allowed;
+            }
         </style>
     </head>
     <body>
@@ -191,7 +215,16 @@
                 </div>
                 
                 @if(session('error'))
-                    <div class="message error">{{ session('error') }}</div>
+                    <div class="message error">
+                        {{ session('error') }}
+                        @if(session('email_not_verified'))
+                            <div style="margin-top: 10px;">
+                                <button onclick="resendVerificationEmail('{{ session('user_email') }}')" class="resend-link">
+                                    Kirim Ulang Email Verifikasi
+                                </button>
+                            </div>
+                        @endif
+                    </div>
                 @endif
                 
                 @if(session('success'))
@@ -208,6 +241,7 @@
                     </div>
                 @endif
                 
+                
                 <div id="message" style="display: none;"></div>
                 
                 <!-- Login Tabs -->
@@ -218,7 +252,7 @@
                 
                 <!-- Email Login Form -->
                 <div id="email-tab" class="tab-content active">
-                    <form action="/peserta/login" method="POST">
+                    <form id="emailLoginForm" action="/peserta/login" method="POST">
                         @csrf
                         <div class="form-group">
                             <label class="form-label">Email *</label>
@@ -244,7 +278,7 @@
                             />
                         </div>
                         
-                        <button type="submit" class="form-button">
+                        <button type="submit" class="form-button" id="emailSubmitBtn">
                             Login dengan Email
                         </button>
                     </form>
@@ -322,91 +356,40 @@
                 event.target.classList.add('active');
             }
             
-            // Email login form handler
-            document.getElementById('emailLoginForm').addEventListener('submit', async function(e) {
-                e.preventDefault();
-                await handleLogin(this, '/api/participant/login', 'emailSubmitBtn');
+            // Ensure CSRF token is fresh before form submission
+            document.getElementById('emailLoginForm').addEventListener('submit', function(e) {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                const formToken = document.querySelector('input[name="_token"]');
+                
+                if (formToken && csrfToken) {
+                    formToken.value = csrfToken;
+                }
+                
+                // Let the form submit normally
+                return true;
             });
             
-            // Phone login form handler
+            // Phone login form handler (if needed in the future)
             document.getElementById('phoneLoginForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
-                await handleLogin(this, '/api/participant/login-phone', 'phoneSubmitBtn');
+                showMessage('Login dengan nomor HP belum tersedia. Silakan gunakan email.', 'error');
             });
             
-            async function handleLogin(form, url, buttonId) {
-                const submitBtn = document.getElementById(buttonId);
-                const messageDiv = document.getElementById('message');
-                
-                // Get form data
-                const formData = new FormData(form);
-                const data = Object.fromEntries(formData);
-                
-                // Basic validation
-                if (url.includes('login-phone')) {
-                    if (!data.nomorWA || !data.password) {
-                        showMessage('Mohon lengkapi semua field', 'error');
-                        return;
-                    }
-                    if (data.nomorWA.length < 10) {
-                        showMessage('Nomor WhatsApp tidak valid', 'error');
-                        return;
-                    }
-                } else {
-                    if (!data.email || !data.password) {
-                        showMessage('Mohon lengkapi semua field', 'error');
-                        return;
-                    }
-                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    if (!emailRegex.test(data.email)) {
-                        showMessage('Format email tidak valid', 'error');
-                        return;
-                    }
-                }
-                
-                if (data.password.length < 6) {
-                    showMessage('Password minimal 6 karakter', 'error');
-                    return;
-                }
-                
-                // Disable button and show loading
-                submitBtn.disabled = true;
-                submitBtn.textContent = 'Memproses...';
-                
-                try {
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        credentials: 'same-origin', // Include cookies
-                        body: JSON.stringify(data)
-                    });
-                    
-                    const result = await response.json();
-                    
-                    if (result.success) {
-                        showMessage('Login berhasil! Mengalihkan...', 'success');
-                        // Force redirect with small delay and ensure session is saved
-                        setTimeout(() => {
-                            // Use window.location.href instead of replace to ensure session cookies
-                            window.location.href = '/peserta/dashboard';
-                        }, 1000);
-                    } else {
-                        showMessage(result.message || 'Login gagal', 'error');
-                    }
-                } catch (error) {
-                    console.error('Login error:', error);
-                    showMessage('Terjadi kesalahan saat login. Silakan coba lagi.', 'error');
-                } finally {
-                    // Re-enable button
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = url.includes('login-phone') ? 'Login dengan No. HP' : 'Login dengan Email';
-                }
-            }
+            // Refresh CSRF token every 30 seconds to prevent expiration
+            setInterval(function() {
+                fetch('/debug/session')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.csrf_token) {
+                            document.querySelector('meta[name="csrf-token"]').setAttribute('content', data.csrf_token);
+                            const formToken = document.querySelector('input[name="_token"]');
+                            if (formToken) {
+                                formToken.value = data.csrf_token;
+                            }
+                        }
+                    })
+                    .catch(error => console.log('CSRF refresh failed:', error));
+            }, 30000);
             
             function showMessage(text, type) {
                 const messageDiv = document.getElementById('message');
@@ -416,6 +399,65 @@
                 
                 // Scroll to message
                 messageDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            
+            // Function to resend verification email using Firebase
+            async function resendVerificationEmail(email) {
+                const button = event.target;
+                button.disabled = true;
+                button.textContent = 'Mengirim...';
+                
+                // Ask for password to re-authenticate
+                const password = prompt('Masukkan password Anda untuk mengirim ulang email verifikasi:');
+                
+                if (!password) {
+                    button.disabled = false;
+                    button.textContent = 'Kirim Ulang Email Verifikasi';
+                    return;
+                }
+                
+                try {
+                    // Sign in with Firebase to get user object
+                    const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                    const user = userCredential.user;
+                    
+                    // Check if already verified
+                    if (user.emailVerified) {
+                        showMessage('Email sudah diverifikasi! Silakan login.', 'success');
+                        button.textContent = 'Sudah Terverifikasi';
+                        // Reload page to clear the error
+                        setTimeout(() => window.location.reload(), 2000);
+                        return;
+                    }
+                    
+                    // Send verification email
+                    await user.sendEmailVerification({
+                        url: window.location.origin + '/peserta/login?verified=true',
+                        handleCodeInApp: false
+                    });
+                    
+                    // Sign out
+                    await auth.signOut();
+                    
+                    showMessage('Email verifikasi telah dikirim ulang ke ' + email + '. Silakan cek inbox Anda (termasuk folder spam).', 'success');
+                    button.textContent = 'Email Terkirim!';
+                    
+                } catch (error) {
+                    console.error('Error resending verification email:', error);
+                    
+                    if (error.code === 'auth/wrong-password') {
+                        showMessage('Password salah. Silakan coba lagi.', 'error');
+                    } else if (error.code === 'auth/user-not-found') {
+                        showMessage('Akun tidak ditemukan.', 'error');
+                    } else if (error.code === 'auth/too-many-requests') {
+                        showMessage('Terlalu banyak percobaan. Silakan tunggu beberapa menit.', 'error');
+                    } else {
+                        showMessage('Terjadi kesalahan: ' + error.message, 'error');
+                    }
+                    
+                    button.disabled = false;
+                    button.textContent = 'Kirim Ulang Email Verifikasi';
+                }
             }
         </script>
     </body>

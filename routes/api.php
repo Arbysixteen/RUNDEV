@@ -45,6 +45,9 @@ Route::any('/debug-request', function (Request $request) {
 Route::post('/register', [App\Http\Controllers\FirebaseAuthController::class, 'register']);
 Route::post('/update-payment', [FirebaseController::class, 'updatePayment']);
 
+// Email verification routes
+Route::post('/resend-verification', [App\Http\Controllers\EmailVerificationController::class, 'resend']);
+
 // Firebase Auth Login routes
 Route::post('/participant/login', [App\Http\Controllers\FirebaseAuthController::class, 'login']);
 Route::post('/participant/login-phone', [App\Http\Controllers\FirebaseAuthController::class, 'loginWithPhone']);

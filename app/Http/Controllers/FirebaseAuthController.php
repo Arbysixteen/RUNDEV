@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Mail;
 use Kreait\Firebase\Contract\Auth;
 use Kreait\Firebase\Contract\Database;
 use Kreait\Firebase\Exception\Auth\EmailExists;
@@ -75,11 +76,15 @@ class FirebaseAuthController extends Controller
                 'ukuranBaju' => $request->ukuranBaju,
                 'idPeserta' => $participantId,
                 'registrationDate' => date('c'), // ISO 8601
-                'pembayaran' => 'belum'
+                'pembayaran' => 'belum',
+                'emailVerified' => false
             ];
 
             // Save to Firebase Realtime Database
             $this->database->getReference('participants/' . $uid)->set($participantData);
+
+            // NOTE: Email verification will be sent by client-side Firebase (registration-simple.blade.php)
+            // No need for server-side email sending or SMTP configuration!
 
             // Log success
             \Log::info('Successfully created Firebase Auth user and saved participant data', [
@@ -89,10 +94,11 @@ class FirebaseAuthController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Pendaftaran berhasil',
+                'message' => 'Pendaftaran berhasil! Silakan cek email Anda untuk verifikasi.',
                 'data' => [
                     'participantId' => $participantId,
-                    'uid' => $uid
+                    'uid' => $uid,
+                    'emailSent' => true
                 ]
             ]);
 
@@ -140,6 +146,15 @@ class FirebaseAuthController extends Controller
 
             // Get user data from Firebase Auth
             $firebaseUser = $this->auth->getUser($uid);
+            
+            // Check if email is verified
+            if (!$firebaseUser->emailVerified) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Email belum diverifikasi. Silakan cek inbox email Anda untuk link verifikasi.',
+                    'code' => 'EMAIL_NOT_VERIFIED'
+                ], 403);
+            }
             
             // Try to get additional participant data from Realtime Database
             $participantSnapshot = $this->database->getReference('participants/' . $uid)->getSnapshot();
@@ -191,12 +206,14 @@ class FirebaseAuthController extends Controller
         } catch (UserNotFound $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Email tidak ditemukan. Silakan daftar terlebih dahulu.'
+                'message' => 'Akun tidak ditemukan. Silakan daftar terlebih dahulu.',
+                'code' => 'USER_NOT_FOUND'
             ], 404);
         } catch (InvalidPassword $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Password salah.'
+                'message' => 'Password salah. Silakan periksa kembali password Anda.',
+                'code' => 'INVALID_PASSWORD'
             ], 401);
         } catch (\Exception $e) {
             \Log::error('Firebase Auth login error', [
@@ -349,6 +366,15 @@ class FirebaseAuthController extends Controller
             // Get user data from Firebase Auth
             $firebaseUser = $this->auth->getUser($uid);
             
+            // Check if email is verified
+            if (!$firebaseUser->emailVerified) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Email belum diverifikasi. Silakan cek inbox email Anda untuk link verifikasi.')
+                    ->with('email_not_verified', true)
+                    ->with('user_email', $request->email);
+            }
+            
             // Try to get additional participant data from Realtime Database
             $participantSnapshot = $this->database->getReference('participants/' . $uid)->getSnapshot();
             
@@ -395,11 +421,11 @@ class FirebaseAuthController extends Controller
         } catch (UserNotFound $e) {
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Email tidak ditemukan. Silakan daftar terlebih dahulu.');
+                ->with('error', 'Akun tidak ditemukan. Silakan daftar terlebih dahulu.');
         } catch (InvalidPassword $e) {
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Password salah.');
+                ->with('error', 'Password salah. Silakan periksa kembali password Anda.');
         } catch (\Exception $e) {
             \Log::error('Firebase Auth web login error', [
                 'error' => $e->getMessage(),

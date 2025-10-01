@@ -10,15 +10,55 @@ Route::get('/pendaftaran', function () {
     return view('registration-simple');
 });
 
+// Email verification route
+Route::get('/verify-email/{token}', [App\Http\Controllers\EmailVerificationController::class, 'verify'])->name('verify.email');
+
 // Debug route
 Route::get('/debug/session', function () {
     return response()->json([
         'session_data' => session()->all(),
         'session_id' => session()->getId(),
         'participant_logged_in' => session('participant_logged_in'),
-        'participant_uid' => session('participant_uid')
+        'participant_uid' => session('participant_uid'),
+        'csrf_token' => csrf_token(),
+        '_token' => session()->token()
     ]);
 });
+
+// Test CSRF route
+Route::get('/csrf-test', function () {
+    return view('csrf-test');
+});
+
+Route::post('/debug/csrf-test', function () {
+    return redirect('/csrf-test')->with('success', 'CSRF test passed successfully!');
+});
+
+// Debug login route without CSRF for testing
+Route::post('/debug/login-test', function (Illuminate\Http\Request $request) {
+    \Log::info('Debug login test', [
+        'email' => $request->email,
+        'password' => $request->password ? 'provided' : 'missing',
+        'session_id' => session()->getId(),
+        'csrf_token' => $request->input('_token'),
+        'session_token' => session()->token()
+    ]);
+    
+    return response()->json([
+        'success' => true,
+        'message' => 'Debug login test completed',
+        'session_id' => session()->getId(),
+        'csrf_match' => $request->input('_token') === session()->token()
+    ]);
+});
+
+// Simple test route with no middleware
+Route::post('/simple-test', function () {
+    return response()->json(['success' => true, 'message' => 'Simple test works']);
+});
+
+// Alternative login route for testing
+Route::post('/alt-login', [App\Http\Controllers\FirebaseAuthController::class, 'loginWeb']);
 
 // Test dashboard without middleware
 Route::get('/test/dashboard', function () {

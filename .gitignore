@@ -1,13 +1,12 @@
 *.log
 .DS_Store
 .env
-
-# Firebase credentials
-*firebase*.json
-
 .env.backup
 .env.production
 .phpactor.json
+
+# Firebase credentials (SENSITIVE!)
+*firebase*.json
 .phpunit.result.cache
 /.fleet
 /.idea
